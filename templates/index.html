@@ -1,55 +1,172 @@
 <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Flask Web App</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    </head>
-    <body>
-        <div class="navbar">
-            <ul>
-                <li><a href="{{ url_for('menu_list') }}">菜單</a></li>
-                <li><a href="{{ url_for('note') }}">注意事項</a></li>
-            </ul>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>菜單管理</title>
+  <!-- 引入 Bootstrap 5 的 CSS 和 JS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    textarea { height: 200px; }
+  </style>
+</head>
+<body>
+<div class="container mt-4">
+  <!-- 🔁 上方選單切換 -->
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link active" onclick="showTab('menu')">🍽️ 菜單</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" onclick="showTab('note')">⚠️ 注意事項</a>
+    </li>
+  </ul>
+
+
+  <!-- 🍱 菜單區塊 -->
+ <div id="menuTab" style="display:block;">
+    <div class="text-center my-4">
+    <span class="badge bg-secondary px-4 py-2 fs-6">🍽️ 總菜單</span>
+  </div>
+    {% for mt in meal_types %}
+      <h4 class="mt-4">{{ mt }}</h4>
+      {% for item in menu_items if item.meal_type == mt %}
+        <div class="card mb-2">
+          <div class="card-body">
+            <strong>{{ item.dish }}</strong> / {{ item.name }}
+            <button class="btn btn-sm btn-info ms-2" data-bs-toggle="collapse" data-bs-target="#note{{ item.id }}">備料</button>
+            <div id="note{{ item.id }}" class="collapse mt-2">
+              <p>{{ item.note }}</p>
+            </div>
+            <button class="btn btn-sm btn-primary float-end"
+              onclick="editItem({{ item.id }}, '{{ item.name }}', '{{ item.meal_type }}', '{{ item.dish }}', `{{ item.note | escape }}`)">
+              修改
+            </button>
+            <form method="POST" action="/delete/{{ item.id }}" style="display: inline;" onsubmit="return confirm('確定要刪除這道菜嗎？');">
+              <button class="btn btn-sm btn-danger float-end">刪除</button>
+            </form>
+
+          </div>
         </div>
-        <h1>歡迎來到菜單系統</h1>
-        <p>從上面的導航切換菜單或查看注意事項。</p>
+      {% endfor %}
+    {% endfor %}
+  
+  <div class="text-center my-4">
+    <span class="badge bg-secondary px-4 py-2 fs-6">🔧 編輯區</span>
+  </div>
 
-        <form method="POST" action="{{ url_for('index') }}">
-            {{ form.hidden_tag() }}
-            <p>{{ form.name.label }}: {{ form.name() }}</p>
-            <p>{{ form.meal_type.label }}: {{ form.meal_type() }}</p>  <!-- 餐别 -->
-            <p>{{ form.dish.label }}: {{ form.dish() }}</p>
-            <p>{{ form.note.label }}: {{ form.note() }}</p>
-            <p>{{ form.submit() }}</p>
-        </form>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <ul>
-                    {% for category, message in messages %}
-                        <li>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        {% endwith %}
+  <!-- 📝 下方編輯表單 -->
+  <div class="mt-5">
+    <h3>新增 / 修改 菜單</h3>
+    <form method="POST" action="/update">
+      <input type="hidden" name="id" id="form-id">
+
+      <div class="mb-3">
+        <label class="form-label">姓名</label>
+        <select name="name" id="form-name" class="form-select" required>
+          {% for u in users %}
+            <option value="{{ u }}">{{ u }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">餐別</label>
+        <select name="meal_type" id="form-meal-type" class="form-select" required>
+          {% for mt in meal_types %}
+            <option value="{{ mt }}">{{ mt }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">菜色</label>
+        <input type="text" name="dish" id="form-dish" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">備料</label>
+        <textarea name="note" id="form-note" class="form-control" required></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-success">提交</button>
+    </form>
+  </div>
+  </div>
+  
+  <!-- ⚠️ 注意事項 Tab -->
+   <div id="noteTab" style="display:none;">
+      <div class="text-center my-4">
+      <span class="badge bg-warning text-dark px-4 py-2 fs-5">⚠️ 注意事項 ⚠️</span>
+  </div>
+
+      {% for user in users %}
+        <h5 class="mt-4">{{ user }}</h5>
+        <ul class="list-group mb-3">
+          {% for note in notes if note.name == user %}
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+              <div class="me-auto">{{ note.content }}</div>
+              <button class="btn btn-sm btn-primary"
+                onclick="editNote({{ note.id }}, '{{ note.name }}', `{{ note.content | escape }}`)">
+                修改
+              </button>
+              <form method="POST" action="/delete_note/{{ note.id }}" style="display: inline;" onsubmit="return confirm('確定要刪除注意事項嗎？');">
+                <button class="btn btn-sm btn-danger float-end">刪除</button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endfor %}
+
+      <hr class="my-5">
+
+      <h4>✏️ 新增 / 修改 注意事項</h4>
+      <form method="POST" action="/update-note">
+        <input type="hidden" name="note_id" id="note-id">
+        <div class="mb-3">
+          <label class="form-label">姓名</label>
+          <select name="name" id="note-name" class="form-select" required>
+            {% for u in users %}
+              <option value="{{ u }}">{{ u }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">注意事項</label>
+          <textarea name="content" id="note-content" rows="5" class="form-control" required></textarea>
+        </div>
+        <button class="btn btn-success">提交    </button>
+      </form>
     </div>
+ 
 
-    <div id="note-tab" class="tab-content">
-        <h2>Notes Section</h2>
-        <p>Here you can list important instructions or any other details.</p>
-    </div>
+<!-- JavaScript -->
+<script>
+  function showTab(tab) {
+    document.getElementById('menuTab').style.display = tab === 'menu' ? 'block' : 'none';
+    document.getElementById('noteTab').style.display = tab === 'note' ? 'block' : 'none';
+    const tabs = document.querySelectorAll('.nav-link');
+    tabs.forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+  
+  
+  function editItem(id, name, meal_type, dish, note) {
+    document.getElementById('form-id').value = id;
+    document.getElementById('form-name').value = name;
+    document.getElementById('form-meal-type').value = meal_type;
+    document.getElementById('form-dish').value = dish;
+    document.getElementById('form-note').value = note;
+    document.getElementById('form-name').scrollIntoView({ behavior: 'smooth' });
+  }
 
-    <script>
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                document.getElementById(tab.dataset.tab).classList.add('active');
-            });
-        });
-    </script>
+  function editNote(id, name, content) {
+      document.getElementById('note-id').value = id;
+      document.getElementById('note-name').value = name;
+      document.getElementById('note-content').value = content;
+    }
+  </script>
+</script>
+
 </body>
 </html>

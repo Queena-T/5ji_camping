@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>菜單</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="navbar">
+        <ul>
+            <li><a href="{{ url_for('menu_list') }}">菜單</a></li>
+            <li><a href="{{ url_for('note') }}">注意事項</a></li>
+        </ul>
+    </div>
+
+    <h1>菜單</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Meal Type</th>
+                <th>Dish</th>
+                <th>Note</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for menu in menus %}
+                <tr>
+                    <td>{{ menu.name }}</td>
+                    <td>{{ menu.meal_type }}</td> 
+                    <td>{{ menu.dish }}</td>
+                    <td>{{ menu.note }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <a href="{{ url_for('index') }}">Back to Menu Form</a>
+</body>
+</html>

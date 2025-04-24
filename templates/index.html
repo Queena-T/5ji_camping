@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Flask Web App</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    </head>
+    <body>
+        <div class="navbar">
+            <ul>
+                <li><a href="{{ url_for('menu_list') }}">菜單</a></li>
+                <li><a href="{{ url_for('note') }}">注意事項</a></li>
+            </ul>
+        </div>
+        <h1>歡迎來到菜單系統</h1>
+        <p>從上面的導航切換菜單或查看注意事項。</p>
+
+        <form method="POST" action="{{ url_for('index') }}">
+            {{ form.hidden_tag() }}
+            <p>{{ form.name.label }}: {{ form.name() }}</p>
+            <p>{{ form.meal_type.label }}: {{ form.meal_type() }}</p>  <!-- 餐别 -->
+            <p>{{ form.dish.label }}: {{ form.dish() }}</p>
+            <p>{{ form.note.label }}: {{ form.note() }}</p>
+            <p>{{ form.submit() }}</p>
+        </form>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div id="note-tab" class="tab-content">
+        <h2>Notes Section</h2>
+        <p>Here you can list important instructions or any other details.</p>
+    </div>
+
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

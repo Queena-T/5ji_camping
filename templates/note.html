@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注意事項</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="navbar">
+        <ul>
+            <li><a href="{{ url_for('menu_list') }}">菜單</a></li>
+            <li><a href="{{ url_for('note') }}">注意事項</a></li>
+        </ul>
+    </div>
+
+    <h1>注意事項</h1>
+    <p>請注意事項的內容。</p>
+</body>
+</html>

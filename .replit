@@ -6,6 +6,7 @@ hidden = [".pythonlibs"]
 
 [nix]
 channel = "stable-24_05"
+packages = ["sqlite-interactive"]
 
 [deployment]
 run =  ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
@@ -14,3 +15,15 @@ deploymentTarget = "cloudrun"
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[workflows]
+runButton = "Run"
+
+[[workflows.workflow]]
+name = "Run"
+author = 41838418
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "gunicorn --bind 0.0.0.0:5000 main:app"

@@ -109,7 +109,7 @@ def delete(item_id):
 # 新增 / 修改 注意事項
 @app.route('/update-note', methods=['POST'])
 def update_note():
-        note_id = request.form.get('id')
+        note_id = request.form.get('note-id')
         name = request.form['name']
         content = request.form['content']
     

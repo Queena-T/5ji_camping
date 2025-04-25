@@ -1,84 +1,76 @@
-      <!DOCTYPE html>
-      <html lang="zh-Hant">
-      <head>
-        <meta charset="UTF-8">
-        <title>菜單與注意事項管理</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-      </head>
-      <body>
-        <div class="container my-5">
-          <!-- 🔁 上方選單切換 -->
-          <ul class="nav nav-tabs">
-            <li class="nav-item"><a class="nav-link" onclick="showTab('menu')">菜單</a></li>
-            <li class="nav-item"><a class="nav-link active" onclick="showTab('note')">注意事項</a></li>
-          </ul>
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>注意事項</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+  <ul class="nav nav-tabs">
+    <li class="nav-item"><a class="nav-link" href="/menu">🍽️ 菜單</a></li>
+    <li class="nav-item"><a class="nav-link active" href="/note">⚠️ 注意事項</a></li>
+  </ul>
 
-          <!-- ✅ 注意事項 Tab 區塊 -->
-          <div id="note-tab" class="mt-4">
-            <div class="text-center mb-4">
-              <span class="badge bg-info text-dark px-4 py-2 fs-5">注意事項</span>
-            </div>
+  <div class="text-center my-4">
+  <span class="badge bg-info text-dark px-4 py-2 fs-6">⚠️ 注意事項</span>
+  </div>
 
-            <!-- 上方注意事項區 -->
-            {% for user in users %}
-              <h5>{{ user }}</h5>
-              <ul class="list-group mb-3">
-                {% for note_item in notes if note_item.name == user %}
-                  <li class="list-group-item">
-                    <div class="d-flex justify-content-between">
-                      <span>{{ note_item.content }}</span>
-                      <button class="btn btn-sm btn-warning ms-2" onclick="editNote({{ note_item.id }}, '{{ note_item.name }}', `{{ note_item.content | escape }}`)">修改</button>
-                        <form method="POST" action="/delete_note/{{ note.id }}" style="display: inline;" onsubmit="return confirm('確定要刪除注意事項嗎？');">
-                          <button class="btn btn-sm btn-danger float-end">刪除</button>
-                    </div>
-                  </li>
-                {% endfor %}
-              </ul>
-            {% endfor %}
+  {% for user in users %}
+    <h5>{{ user }}</h5>
+    <ul class="list-group mb-3">
+      {% for note in notes if note.name == user %}
+        <li class="list-group-item">
+          {{ note.content }}
+          <button class="btn btn-sm btn-primary float-end" style="margin-left: 30px;"
+            onclick="editNote({{ note.id }}, '{{ note.name }}', `{{ note.content | escape }}`)">
+            修改
+          </button>
+          <form method="POST" action="/delete_note/{{ note.id }}" class="float-end" onsubmit="return confirm('確定要刪除嗎？');">
+            <button class="btn btn-sm btn-danger">刪除</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endfor %}
 
-            <hr class="my-4">
+  <div class="text-center my-4">
+    <span class="badge bg-secondary px-4 py-2 fs-6">🔧 編輯區</span>
+  </div>
 
-            <!-- 下方表單區 -->
-            <h4>新增 / 修改注意事項</h4>
-            <form method="POST" action="/update-note">
-              <input type="hidden" name="note-id" id="note-id">
+  <h4>新增 / 修改注意事項</h4>
+    <form method="POST" action="/update-note">
+      <input type="hidden" name="note-id" id="note-id">
 
-              <div class="mb-3">
-                <label class="form-label">姓名</label>
-                <select name="name" id="note-name" class="form-select" required>
-                  {% for user in users %}
-                    <option value="{{ user }}">{{ user }}</option>
-                  {% endfor %}
-                </select>
-              </div>
+      <div class="mb-3">
+        <label class="form-label">姓名</label>
+        <select name="name" id="note-name" class="form-select" required>
+          {% for user in users %}
+            <option value="{{ user }}">{{ user }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
-              <div class="mb-3">
-                <label class="form-label">注意事項</label>
-                <textarea name="content" id="note-content" rows="5" class="form-control" required></textarea>
-              </div>
+      <div class="mb-3">
+        <label class="form-label">注意事項</label>
+        <textarea name="content" id="note-content" rows="5" class="form-control" required></textarea>
+      </div>
 
-              <button type="submit" class="btn btn-success">提交</button>
-            </form>
-          </div>
-        </div>
+      <button type="submit" class="btn btn-success">提交</button>
+    </form>
+  </div>
 
-        <script>
-          
-          // 提交後跳轉回注意事項 Tab
-          document.querySelector('form').addEventListener('submit', function () {
-            window.location.hash = "#note";  // 確保提交後會跳到注意事項 Tab
-          });
-          
-          
-          function editNote(id, name, content) {
-            document.getElementById('note-id').value = id;
-            document.getElementById('note-name').value = name;
-            document.getElementById('note-content').value = content;
-            // 自動切換到注意事項 tab（如果不是本來就在）
-            showTab('note');
-          };
-        </script>
-      </body>
-      </html>
+  <!-- JavaScript -->
+  <script>
+
+    function editNote(id, name, content) {
+        document.getElementById('note-id').value = id;
+        document.getElementById('note-name').value = name;
+        document.getElementById('note-content').value = content;
+      }
+    </script>
+  </script>
+
+  
+</body>
+</html>

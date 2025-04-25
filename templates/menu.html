@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>菜單頁面</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <style>textarea { height: 200px; }</style>
+</head>
+<body>
+<div class="container mt-4">
+  <ul class="nav nav-tabs">
+    <li class="nav-item"><a class="nav-link active" href="/menu">🍽️ 菜單</a></li>
+    <li class="nav-item"><a class="nav-link" href="/note">⚠️ 注意事項</a></li>
+  </ul>
+
+  <div class="text-center my-4">
+  <span class="badge bg-info text-dark px-4 py-2 fs-6">🍽️ 總菜單</span>
+  </div>
+
+  {% for mt in meal_types %}
+    <h4 class="mt-4">{{ mt }}</h4>
+    {% for item in menu_items if item.meal_type == mt %}
+      <div class="card mb-2">
+        <div class="card-body">
+          <strong>{{ item.dish }}</strong> / {{ item.name }}
+          <button class="btn btn-sm btn-info ms-2" data-bs-toggle="collapse" data-bs-target="#note{{ item.id }}">備料</button>
+          <div id="note{{ item.id }}" class="collapse mt-2">
+            <p>{{ item.note }}</p>
+          </div>
+          <button class="btn btn-sm btn-primary float-end" style="margin-left: 30px;"
+            onclick="editItem({{ item.id }}, '{{ item.name }}', '{{ item.meal_type }}', '{{ item.dish }}', `{{ item.note | escape }}`)">
+            修改
+          </button>
+          &nbsp;&nbsp;
+          <form method="POST" action="/delete/{{ item.id }}" style="display:inline;" onsubmit="return confirm('確定要刪除嗎？');">
+            <button class="btn btn-sm btn-danger float-end">刪除</button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+  {% endfor %}
+
+  <div class="text-center my-4">
+    <span class="badge bg-secondary px-4 py-2 fs-6">🔧 編輯區</span>
+  </div>
+
+  <!-- 📝 下方編輯表單 -->
+  <div class="mt-5">
+    <h3>新增 / 修改 菜單</h3>
+    <form method="POST" action="/update">
+      <input type="hidden" name="id" id="form-id">
+
+      <div class="mb-3">
+        <label class="form-label">姓名</label>
+        <select name="name" id="form-name" class="form-select" required>
+          {% for u in users %}
+            <option value="{{ u }}">{{ u }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">餐別</label>
+        <select name="meal_type" id="form-meal-type" class="form-select" required>
+          {% for mt in meal_types %}
+            <option value="{{ mt }}">{{ mt }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">菜色</label>
+        <input type="text" name="dish" id="form-dish" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">備料</label>
+        <textarea name="note" id="form-note" class="form-control" required></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-success">提交</button>
+    </form>
+  </div>
+  </div>
+
+  
+  <!-- JavaScript -->
+  <script>
+
+    function editItem(id, name, meal_type, dish, note) {
+      document.getElementById('form-id').value = id;
+      document.getElementById('form-name').value = name;
+      document.getElementById('form-meal-type').value = meal_type;
+      document.getElementById('form-dish').value = dish;
+      document.getElementById('form-note').value = note;
+      document.getElementById('form-name').scrollIntoView({ behavior: 'smooth' });
+    }
+    </script>
+  </script>
+
+</body>
+</html>

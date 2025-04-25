@@ -39,16 +39,28 @@ def __repr__(self):
 with app.app_context():
     db.create_all()
 
-# # 總菜單
+# 首頁
 @app.route('/')
 def index():
+    return redirect(url_for('menu'))
+
+# 總菜單
+@app.route('/menu')
+def menu():
     menu_items = Menu.query.order_by(Menu.meal_type).all()
     notes = Note.query.order_by(Note.name).all()
-    return render_template('index.html',
+    return render_template('menu.html',
                            menu_items=menu_items,
                            meal_types=meal_types,
                            notes=notes,
                            users=users)
+    
+# 注意事項頁面
+@app.route('/note')
+def note():
+    notes = Note.query.order_by(Note.name).all()
+    return render_template('note.html', notes=notes, users=users)
+
 
 # 表单：用来提交菜单数据
 class MenuForm(FlaskForm):
@@ -79,10 +91,10 @@ def update():
         new_item.meal_type = meal_type
         new_item.dish = dish
         new_item.note = note
-        db.session.add(new_item)
+        db.session.add(new_item) 
 
     db.session.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('menu'))
 
 # ✅ 刪除功能
 @app.route('/delete/<int:item_id>', methods=['POST'])
@@ -91,13 +103,8 @@ def delete(item_id):
     if item:
         db.session.delete(item)
         db.session.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('menu'))
 
-# 注意事項頁面
-@app.route('/note')
-def note():
-    notes = Note.query.order_by(Note.name).all()
-    return render_template('note.html', notes=notes, users=users)
 
 # 新增 / 修改 注意事項
 @app.route('/update-note', methods=['POST'])
@@ -119,7 +126,7 @@ def update_note():
             db.session.add(new_note)
             db.session.commit()
     
-        return redirect(url_for('index') + '#note')
+        return redirect(url_for('note'))
 
 # ✅ 刪除功能
 @app.route('/delete_note/<int:note_id>', methods=['POST'])
@@ -128,7 +135,7 @@ def delete_note(note_id):
     if item:
         db.session.delete(item)
         db.session.commit()
-    return redirect(url_for('index') + 'note')
+    return redirect(url_for('note'))
     
 if __name__ == '__main__':
     app.run(debug=True)

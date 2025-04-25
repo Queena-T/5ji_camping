@@ -16,7 +16,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # 使用者與餐別選項
-users = ["🐻大熊小熊中熊🐻", "🐢穎妤🐢","🐶安鎂吉🐶"]
+users = ["🐻大熊小熊中熊🐻", "🐢穎俞🐢","🐶安鎂吉🐶"]
 meal_types = ["Breakfast", "Night snack", "Dinner"]
 
 
